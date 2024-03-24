@@ -1,9 +1,9 @@
----
 - name: Configurar e Instalar Docker y Docker Compose
   hosts: all
-  become: yes
+  become: yes  # Enable privilege escalation for all tasks
   tasks:
-    - name: Instalar dependencias para repositorio Docker en Ubuntu
+
+    - name: Install dependencies for Docker repo on Ubuntu (using dedicated sudo user)
       apt:
         name: "{{ item }}"
         state: present
@@ -13,56 +13,35 @@
         - ca-certificates
         - curl
         - software-properties-common
+      become: true
+      become_user: angelina 
+      become_password: "{{ 2162012 }}"
       when: ansible_distribution == "Ubuntu"
 
-    - name: Agregar clave GPG de Docker para Ubuntu
-      ansible.builtin.apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        state: present
-      when: ansible_distribution == "Ubuntu"
-
-    - name: Agregar repositorio de Docker en Ubuntu
-      ansible.builtin.apt_repository:
-        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
-        state: present
-      when: ansible_distribution == "Ubuntu"
-
-    - name: Desinstalar moby-engine en Fedora
-      dnf:
-        name: moby-engine
-        state: absent
-      when: ansible_distribution == "Fedora"
-
-    - name: Instalar dependencias para repositorio Docker en Fedora
-      dnf:
-        name: dnf-plugins-core
-        state: present
-      when: ansible_distribution == "Fedora"
-
-    - name: Agregar repositorio de Docker en Fedora
-      shell: dnf config-manager --add-repo=https://download.docker.com/linux/fedora/docker-ce.repo
-      when: ansible_distribution == "Fedora"
-
-    - name: Instalar Docker en Ubuntu y Fedora
-      package:
-        name: docker-ce
-        state: present
-      when: ansible_distribution in ["Ubuntu", "Fedora"]
-
-    - name: Instalar Docker Compose
-      get_url:
-        url: "https://github.com/docker/compose/releases/latest/download/docker-compose-{{ ansible_system }}-{{ ansible_userspace_architecture }}"
-        dest: /usr/local/bin/docker-compose
-        mode: 'u+x,g+x'
-    - name: Instalar Git en Ubuntu
+    - name: Install Git on Ubuntu (using dedicated sudo user)
       apt:
         name: git
         state: present
         update_cache: yes
+      become: true
+      become_user: angelina 
+      become_password: "{{ 2162012 }}"
       when: ansible_distribution == "Ubuntu"
 
-    - name: Instalar Git en Fedora
+    - name: Install dependencies for Docker repo on Fedora (using dedicated sudo user)
+      dnf:
+        name: dnf-plugins-core
+        state: present
+      become: true
+      become_user: asantana  
+      become_password: "{{ 2162012 }}"
+      when: ansible_distribution == "Fedora"
+
+    - name: Install Git on Fedora (using dedicated sudo user)
       dnf:
         name: git
         state: present
-      when: ansible_distribution == "Fedora"    
+      become: true
+      become_user: asantana  
+      become_password: "{{ 2162012 }}"
+      when: ansible_distribution == "Fedora"
